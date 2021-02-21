@@ -44,25 +44,6 @@ exports.create = async (userData) => {
 };
 
 /**
- * Replace existing user
- * @public
- */
-exports.replace = async (user, newUserData) => {
-  try {
-    const newUser = new User(newUserData);
-    const ommitRole = user.role !== 'admin' ? 'role' : '';
-    const newUserObject = omit(newUser.toObject(), '_id', ommitRole);
-
-    await user.update(newUserObject, { override: true, upsert: true });
-    const savedUser = await User.findById(user._id);
-
-    return savedUser.transform();
-  } catch (error) {
-    throw User.checkDuplicateEmail(error);
-  }
-};
-
-/**
  * Update existing user
  * @public
  */
@@ -71,6 +52,7 @@ exports.update = async (user, updatedData) => {
     const ommitRole = user.role !== 'admin' ? 'role' : '';
     const userTobeUpdated = omit(updatedData, ommitRole);
     const updatedUser = Object.assign(user, userTobeUpdated);
+    console.log('>>>', 'user.service.js 55', updatedUser);
     const savedUser = await updatedUser.save();
     return savedUser.transform();
   } catch (error) {
@@ -84,6 +66,7 @@ exports.update = async (user, updatedData) => {
  */
 exports.list = async (params) => {
   try {
+    console.log('>>>', 'user.service.js 69', params);
     const users = await User.list(params);
     const transformedUsers = users.map(user => user.transform());
     return transformedUsers;

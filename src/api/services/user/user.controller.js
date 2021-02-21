@@ -9,6 +9,7 @@ const { handler: errorHandler } = require('../../middlewares/error');
 exports.load = async (req, res, next, id) => {
   try {
     const user = await service.get(id);
+    console.log('>>>', 'user.controller.js 12', user);
     req.locals = { user };
     return next();
   } catch (error) {
@@ -42,25 +43,12 @@ exports.create = async (req, res, next) => {
 };
 
 /**
- * Replace existing user
- * @public
- */
-exports.replace = async (req, res, next) => {
-  try {
-    const { user } = req.locals;
-    const response = await service.replace(user, req.body);
-    return res.json(response);
-  } catch (error) {
-    return next(error);
-  }
-};
-
-/**
  * Update existing user
  * @public
  */
 exports.update = async (req, res, next) => {
   try {
+    console.log('>>>', 'user.controller.js 51',);
     const { user } = req.locals;
     const response = await service.update(user, req.body);
     return res.json(response);

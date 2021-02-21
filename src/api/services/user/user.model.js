@@ -45,11 +45,16 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: roles,
-    default: 'user',
+    default: 'admin',
   },
   picture: {
     type: String,
     trim: true,
+  },
+  orgId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Org',
+    required: true,
   },
 }, {
   timestamps: true,
@@ -82,7 +87,7 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt'];
+    const fields = ['id', 'name', 'email', 'picture', 'orgId', 'orgName', 'role', 'createdAt'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
@@ -123,8 +128,11 @@ userSchema.statics = {
       let user;
 
       if (mongoose.Types.ObjectId.isValid(id)) {
-        user = await this.findById(id).exec();
+        user = await this.findById(id).populate({
+          path: 'orgId'
+        }).exec();
       }
+      console.log('>>>', 'user.model.js 135', JSON.stringify(user));
       if (user) {
         return user;
       }
@@ -174,11 +182,15 @@ userSchema.statics = {
    * @returns {Promise<User[]>}
    */
   list({
-    page = 1, perPage = 30, name, email, role,
+    page = 1, perPage = 30, name, email, role, orgName
   }) {
     const options = omitBy({ name, email, role }, isNil);
-
+    console.log('>>>', 'user.model.js 188', orgName);
     return this.find(options)
+      .populate({
+        "path": "orgs.name",
+        "match": { "en": { "$in": [orgName] } }
+      })
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
